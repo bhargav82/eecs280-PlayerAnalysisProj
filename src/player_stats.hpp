@@ -31,10 +31,18 @@ struct Player {
  * Takes in an instance of Struct Player, returns the year he was born.
  */
 int ageToYearBorn ( Player &p );
-const std::vector<std::string> parse_arguments(int argc, char* argv[]);
-const std::vector<std::string> find_flags(std::vector<std::string> arguments);
-const std::vector<Player> create_player_vector(std::string fileName);
+const std::vector<std::string> parse_arguments(int argc, const char* argv[]);
+const std::vector<std::string> find_flags(const std::vector<std::string>& arguments);
+const std::vector<Player> create_player_vector(const std::string& fileName);
+const std::vector<Player> filtered_players(const std::vector<Player>& total_list_players, const std::string& filter);
+const std::vector<std::string> non_flag_inputs(const std::vector<std::string> &arguments);
+
+
+
+void print_histogram(Player& p);
+
 int similarity( Player &a, Player &b );
+
 
 /* You will need to define and implement these functions
  * How exactly is up to you,
@@ -46,7 +54,7 @@ int similarity( Player &a, Player &b );
  * Similarity should be the Euclidian distance between the stats vectors / arrays of
  * player a and player b.
  */
-//int similarity( Player &a, Player &b );
+
 
 /* count()  -- should return the number if items in a set */
 

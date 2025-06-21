@@ -5,10 +5,13 @@
 #include <cmath>
 #include "player_stats.hpp"
 
-const std::vector<std::string> parse_arguments(int argc, char* argv[]) {
+
+
+// stores command line inputs into vec
+const std::vector<std::string> parse_arguments(int argc, const char* argv[]) {
 	
 
-	// return arguments
+	// return vector of arguments
 	std::vector<std::string> arguments; 
 	int counter = 0;
 	while (counter < argc) {
@@ -21,7 +24,8 @@ const std::vector<std::string> parse_arguments(int argc, char* argv[]) {
 }
 
 
-const std::vector<std::string> find_flags(std::vector<std::string> arguments) {
+// finds flags/filters (inputs with "--")
+const std::vector<std::string> find_flags(const std::vector<std::string>& arguments) {
 
 	std::vector<std::string> flags;
 
@@ -37,8 +41,22 @@ const std::vector<std::string> find_flags(std::vector<std::string> arguments) {
 }
 
 
+// store all inputs except flags and filename
+const std::vector<std::string> non_flag_inputs(const std::vector<std::string>& arguments) {
 
-const std::vector<Player> create_player_vector(std::string fileName) {
+	std::vector<std::string> filters;
+
+	for (std::string arg : arguments) {
+		if (arg.find("-") == std::string::npos && arg.find(".csv") == std::string::npos && arg.find("./") == std::string::npos){
+			filters.push_back(arg);
+		}
+	}
+	
+	return filters;
+}
+
+// parse file and convert each line to Player (struct), store in a vector of Players
+const std::vector<Player> create_player_vector(const std::string& fileName) {
 
 	std::ifstream inputFile;
 
@@ -129,6 +147,12 @@ int ageToYearBorn ( Player &p ) {
 	return yearBorn;
 }
 
+
+
+
+
+// compares two players stats of equal length, returns [0, 100] similarity score
+
 int similarity( Player &a, Player &b ){
 	int similarity_percent = 0;
 
@@ -149,3 +173,19 @@ int similarity( Player &a, Player &b ){
 }
 
 
+
+// only call when chart is a flag
+void print_histogram(Player& p){
+
+	for (int stat : p.stats){
+		int count = 0;
+
+		while (count < stat){
+			std::cout << "-";
+			count++;
+		}
+		std::cout << std::endl;
+		
+	}
+
+}
