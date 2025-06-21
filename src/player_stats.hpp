@@ -34,6 +34,7 @@ int ageToYearBorn ( Player &p );
 const std::vector<std::string> parse_arguments(int argc, char* argv[]);
 const std::vector<std::string> find_flags(std::vector<std::string> arguments);
 const std::vector<Player> create_player_vector(std::string fileName);
+int similarity( Player &a, Player &b );
 
 /* You will need to define and implement these functions
  * How exactly is up to you,

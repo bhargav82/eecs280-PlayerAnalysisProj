@@ -2,6 +2,7 @@
 #include <ctime>
 #include <fstream>
 #include <sstream>
+#include <cmath>
 #include "player_stats.hpp"
 
 const std::vector<std::string> parse_arguments(int argc, char* argv[]) {
@@ -34,6 +35,7 @@ const std::vector<std::string> find_flags(std::vector<std::string> arguments) {
 	}
 	return flags;
 }
+
 
 
 const std::vector<Player> create_player_vector(std::string fileName) {
@@ -126,4 +128,24 @@ int ageToYearBorn ( Player &p ) {
 	std::cout << p.name << " was born in the year " << yearBorn << std::endl;
 	return yearBorn;
 }
+
+int similarity( Player &a, Player &b ){
+	int similarity_percent = 0;
+
+	std::vector<int> player_a_stats = a.stats;
+	std::vector<int> player_b_stats = b.stats;
+
+	int min = std::min(a.stats.size(), b.stats.size());
+	double summation = 0;
+
+	for (int i = 0; i < min; i++){
+		summation += std::pow( a.stats.at(i) - b.stats.at(i), 2);
+	}
+
+	summation = std::sqrt(summation);
+	similarity_percent = (1/(1 + summation)) * 100;
+
+	return similarity_percent;
+}
+
 

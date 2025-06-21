@@ -33,11 +33,35 @@ TEST(parse_args_test, parse_args) {
     const char* fake_args_2[] = {"\n"};
     std::vector<std::string> result2;
     EXPECT_EQ(parse_arguments(0, const_cast<char**>(fake_args_2)), result2);
-    
+
 
     const char* fake_args_3[] = {"23", "./soccer_players", "#@$@{}"};
     std::vector<std::string> result3 = {"23", "./soccer_players", "#@$@{}"};
     EXPECT_EQ(parse_arguments(3, const_cast<char**>(fake_args_3)), result3);
 
     
+}
+
+
+TEST(check_similarity_score, similarity_score) {
+
+    Player a = {"John Doe", 23, "USA", 180, 90, "FC Barcalona", "$13,000,000", {12, 32, 543}};
+    Player b = {"John Doe", 23, "USA", 180, 90, "FC Barcalona", "$13,000,000", {12, 32, 543}};
+    EXPECT_EQ(similarity(a, b), 100);
+
+
+    Player c = {"John Doe", 23, "USA", 180, 90, "FC Barcalona", "$13,000,000", {12, 32, 543, 323, 313}};
+    Player d = {"John Doe", 23, "USA", 180, 90, "FC Barcalona", "$13,000,000", {12, 32, 543}};
+    EXPECT_EQ(similarity(c, d), 100);
+
+
+    Player e = {"John Doe", 23, "USA", 180, 90, "FC Barcalona", "$13,000,000", {12, 32, 543, 323, 313}};
+    Player f = {"John Doe", 23, "USA", 180, 90, "FC Barcalona", "$13,000,000", {13, 32, 543}};
+    EXPECT_EQ(similarity(e, f), 50);
+
+
+    Player g = {"John Doe", 23, "USA", 180, 90, "FC Barcalona", "$13,000,000", {14, 32, 543}};
+    Player h = {"John Doe", 23, "USA", 180, 90, "FC Barcalona", "$13,000,000", {12, 32, 543, 323, 313}};
+    EXPECT_EQ(similarity(g, h), 33);
+
 }
