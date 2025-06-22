@@ -74,6 +74,7 @@ int similarity( Player &a, Player &b );
 /* min() -- should return the smallest value in a set */
 
 /* max() -- should return the largest value in a set */
+int max(std::vector<int>& nums);
 
 /* filter() -- should return all values given filter is a match */
 
