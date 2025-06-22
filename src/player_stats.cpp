@@ -3,7 +3,7 @@
 #include <fstream>
 #include <sstream>
 #include <cmath>
-#include <map>
+#include <cctype>
 #include "player_stats.hpp"
 
 
@@ -28,15 +28,40 @@ std::vector<Player> filter_by_flag(const std::vector<Player>& all_players, const
 	for (std::string flag : flags){
 		if (flag == "--chart"){
 			std::string name = non_input_flags.at(0);
+			name = to_lower(name);
 
 			for (Player p : all_players) {
 				if (p.name.find(name) != std::string::npos) {
-					print_histogram(p, headers);
 					players.push_back(p);
 					
 				}
 			}
+
+			size_t players_size = players.size();
+
+			if (players_size < 1){
+				std::cout << "No player found" << std::endl;
+			}
+
+			else if (players_size == 1) {
+				std::cout << "You chose player: " << players.at(0).name << std::endl;
+				print_histogram(players.at(0), headers);
+				
+			}
+
+			else {
+				std::cout << "Choose one of the following players: " << std::endl;
+				for (Player q : players){
+					std::cout << q.name << std::endl;
+				}
+				std::string new_player;
+				std::cin >> new_player;
+				std::vector<std::string> new_players = {new_player};
+				filter_by_flag(all_players, flags, new_players, headers);
+			}
+			return players;
 		}
+
 		
 	}
 	return players;
@@ -92,7 +117,7 @@ const std::vector<std::string> non_flag_inputs(const std::vector<std::string>& a
 	std::vector<std::string> filters;
 
 	for (std::string arg : arguments) {
-		if (arg.find("-") == std::string::npos && arg.find(".csv") == std::string::npos && arg.find("./") == std::string::npos){
+		if (arg.find("-") == std::string::npos && arg.find(".") == std::string::npos && arg.find("/") == std::string::npos){
 			filters.push_back(arg);
 		}
 	}
@@ -132,7 +157,7 @@ const std::vector<Player> create_player_vector(const std::string& fileName) {
   	inputFile.open(fileName);
 
   	if (!inputFile.is_open()) {
-     	std::cerr << "Error opening up file" << fileName << std::endl;
+     	std::cerr << "Error opening up file: " << fileName << std::endl;
 
   	}
 
@@ -161,7 +186,7 @@ const std::vector<Player> create_player_vector(const std::string& fileName) {
 			player_info.push_back(token);
 		}
 
-		new_player.name = player_info.at(0);
+		new_player.name = to_lower(player_info.at(0));
 		new_player.country = player_info.at(1);
 		new_player.height_cm = std::stoi(player_info.at(2));
 		new_player.weight_kg = std::stoi(player_info.at(3));
@@ -246,6 +271,14 @@ int similarity( Player &a, Player &b ){
 	return similarity_percent;
 }
 
+
+const std::string to_lower(std::string& word){
+	std::string lower;
+	for (char &c : word){
+		lower += std::towlower(c);
+	}
+	return lower;
+}
 
 
 // only call when chart invoked 

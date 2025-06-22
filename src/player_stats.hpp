@@ -50,6 +50,7 @@ const std::vector<std::string> find_headers(const std::string &filename);
 
 std::vector<Player> filter_by_flag(const std::vector<Player>& all_players, const std::vector<std::string>& flags, const std::vector<std::string>& non_input_flags, const std::vector<std::string>& headers);
 
+const std::string to_lower(std::string& word);
 
 /* You will need to define and implement these functions
  * How exactly is up to you,
