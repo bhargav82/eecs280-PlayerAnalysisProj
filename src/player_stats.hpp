@@ -32,7 +32,7 @@ struct Player {
  */
 
 int ageToYearBorn ( Player &p );
-void print_histogram(Player& p);
+void print_histogram(Player& p, const std::vector<std::string> &headers);
 
 
 
@@ -45,10 +45,10 @@ const std::vector<Player> create_player_vector(const std::string& fileName);
 
 const std::string find_csv(const std::vector<std::string>& arguments);
 bool check_flags(const std::vector<std::string>& flags);
+const std::vector<std::string> find_headers(const std::string &filename);
 
 
-
-
+std::vector<Player> filter_by_flag(const std::vector<Player>& all_players, const std::vector<std::string>& flags, const std::vector<std::string>& non_input_flags, const std::vector<std::string>& headers);
 
 
 /* You will need to define and implement these functions

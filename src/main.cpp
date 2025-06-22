@@ -33,7 +33,14 @@ int main(int argc, char *argv[]) {
 	const std::vector<std::string> filters = non_flag_inputs(arguments);
 	const std::string fileName = find_csv(arguments);
 
+
+	const std::vector<std::string> headers = find_headers(fileName);
 	const std::vector<Player> players = create_player_vector(fileName);
+	
+
+	std::vector<Player> filtered = filter_by_flag(players, flags, filters, headers);
+
+
 
 
 

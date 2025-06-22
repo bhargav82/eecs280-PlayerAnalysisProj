@@ -3,10 +3,8 @@
 #include <fstream>
 #include <sstream>
 #include <cmath>
+#include <map>
 #include "player_stats.hpp"
-
-//filter name (the ‘player’ column), country, club, vision, agility, marking, and value
-
 
 
 bool check_flags(const std::vector<std::string>& flags) {
@@ -21,6 +19,27 @@ bool check_flags(const std::vector<std::string>& flags) {
 	}
 
 	return false;
+}
+
+std::vector<Player> filter_by_flag(const std::vector<Player>& all_players, const std::vector<std::string>& flags, const std::vector<std::string>& non_input_flags, const std::vector<std::string>& headers){
+	
+	std::vector<Player> players;
+
+	for (std::string flag : flags){
+		if (flag == "--chart"){
+			std::string name = non_input_flags.at(0);
+
+			for (Player p : all_players) {
+				if (p.name.find(name) != std::string::npos) {
+					print_histogram(p, headers);
+					players.push_back(p);
+					
+				}
+			}
+		}
+		
+	}
+	return players;
 }
 
 // stores command line inputs into vec
@@ -82,6 +101,29 @@ const std::vector<std::string> non_flag_inputs(const std::vector<std::string>& a
 }
 
 
+const std::vector<std::string> find_headers(const std::string &filename) {
+
+	std::ifstream inputFile;
+	inputFile.open(filename);
+
+	if (!inputFile.is_open()) {
+		std::cerr << "Error opening up file: " << filename << std::endl;
+	}
+
+	std::string first_line;
+	getline(inputFile, first_line);
+	std::stringstream columns(first_line);
+	std::string data;
+	std::vector<std::string> headers;
+
+	while (getline(columns, data, ',')) {
+		headers.push_back(data);
+	}
+
+
+	return headers;
+}
+
 // parse file and convert each line to Player (struct), store in a vector of Players
 const std::vector<Player> create_player_vector(const std::string& fileName) {
 
@@ -90,12 +132,17 @@ const std::vector<Player> create_player_vector(const std::string& fileName) {
   	inputFile.open(fileName);
 
   	if (!inputFile.is_open()) {
-     	std::cerr << "Error opening up file" << std::endl;
+     	std::cerr << "Error opening up file" << fileName << std::endl;
 
   	}
 
 	std::string first_line;
 	getline(inputFile, first_line);
+	
+
+
+
+	
 
 	std::vector<Player> all_players;
 	std::string line;
@@ -202,11 +249,12 @@ int similarity( Player &a, Player &b ){
 
 
 // only call when chart invoked 
-void print_histogram(Player& p){
-
+void print_histogram(Player& p, const std::vector<std::string> &headers){
+	int increment = 6;
 	for (int stat : p.stats){
 		int count = 0;
-
+		
+		std::cout << headers.at(increment++) << ": ";
 		while (count < stat){
 			std::cout << "-";
 			count++;
