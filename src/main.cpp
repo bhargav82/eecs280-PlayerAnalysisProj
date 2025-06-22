@@ -18,11 +18,25 @@ int main(int argc, char *argv[]) {
 
 	// }
 
+	if (argc <= 1) {
+		std::cout << "Please enter a filename, filter, and flag" << std::endl;
+		std::cout << "Flags include: age, country, or any of the stats" << std::endl;
+		return 1;
+	}
+
+
 
 	
+	const std::vector<std::string> arguments = parse_arguments(argc, argv);
 
-	Player p = {"John Doe", 23, "USA", 180, 90, "FC Barcalona", "$13,000,000", {54, 23, 99}};
-	print_histogram(p);
+	const std::vector<std::string> flags = find_flags(arguments);
+	const std::vector<std::string> filters = non_flag_inputs(arguments);
+	const std::string fileName = find_csv(arguments);
+
+	const std::vector<Player> players = create_player_vector(fileName);
+
+
+
 	return 0;
 
 }

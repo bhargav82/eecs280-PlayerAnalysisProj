@@ -5,10 +5,26 @@
 #include <cmath>
 #include "player_stats.hpp"
 
+//filter name (the ‘player’ column), country, club, vision, agility, marking, and value
 
+
+
+bool check_flags(const std::vector<std::string>& flags) {
+	std::vector<std::string> available_flags = {"--name", "--country", "--club", "--vision", "--agility", "--marking", "--value"};
+
+	for (std::string flag : flags){
+		for (std::string available : available_flags){
+			if (flag == available){
+				return true;
+			}
+		}
+	}
+
+	return false;
+}
 
 // stores command line inputs into vec
-const std::vector<std::string> parse_arguments(int argc, const char* argv[]) {
+const std::vector<std::string> parse_arguments(int argc, char* argv[]) {
 	
 
 	// return vector of arguments
@@ -23,6 +39,17 @@ const std::vector<std::string> parse_arguments(int argc, const char* argv[]) {
 
 }
 
+const std::string find_csv(const std::vector<std::string>& arguments) {
+	
+	for (std::string arg : arguments){
+		if (arg.find(".csv") != std::string::npos) {
+			return arg;
+		}	
+	}
+	
+	return "No File Input";
+}
+
 
 // finds flags/filters (inputs with "--")
 const std::vector<std::string> find_flags(const std::vector<std::string>& arguments) {
@@ -31,7 +58,6 @@ const std::vector<std::string> find_flags(const std::vector<std::string>& argume
 
 	for (std::string arg : arguments)
 	{
-		std::cout << "You provided an argument, it is: " << arg << std::endl;
 		std::string arg_string = arg;
 		if (arg_string.find("--") != std::string::npos){
 			flags.push_back(arg_string);
@@ -41,7 +67,7 @@ const std::vector<std::string> find_flags(const std::vector<std::string>& argume
 }
 
 
-// store all inputs except flags and filename
+// store all inputs except flags and files
 const std::vector<std::string> non_flag_inputs(const std::vector<std::string>& arguments) {
 
 	std::vector<std::string> filters;
@@ -54,6 +80,7 @@ const std::vector<std::string> non_flag_inputs(const std::vector<std::string>& a
 	
 	return filters;
 }
+
 
 // parse file and convert each line to Player (struct), store in a vector of Players
 const std::vector<Player> create_player_vector(const std::string& fileName) {
@@ -174,7 +201,7 @@ int similarity( Player &a, Player &b ){
 
 
 
-// only call when chart is a flag
+// only call when chart invoked 
 void print_histogram(Player& p){
 
 	for (int stat : p.stats){

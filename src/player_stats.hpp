@@ -30,18 +30,25 @@ struct Player {
  * We know the data was last updated in June 2025 so we assume it is up-to-date.
  * Takes in an instance of Struct Player, returns the year he was born.
  */
+
 int ageToYearBorn ( Player &p );
-const std::vector<std::string> parse_arguments(int argc, const char* argv[]);
-const std::vector<std::string> find_flags(const std::vector<std::string>& arguments);
-const std::vector<Player> create_player_vector(const std::string& fileName);
-const std::vector<Player> filtered_players(const std::vector<Player>& total_list_players, const std::string& filter);
-const std::vector<std::string> non_flag_inputs(const std::vector<std::string> &arguments);
-
-
-
 void print_histogram(Player& p);
 
-int similarity( Player &a, Player &b );
+
+
+const std::vector<std::string> parse_arguments(int argc, char* argv[]);
+const std::vector<std::string> find_flags(const std::vector<std::string>& arguments);
+const std::vector<std::string> non_flag_inputs(const std::vector<std::string> &arguments);
+
+const std::vector<Player> create_player_vector(const std::string& fileName);
+
+
+const std::string find_csv(const std::vector<std::string>& arguments);
+bool check_flags(const std::vector<std::string>& flags);
+
+
+
+
 
 
 /* You will need to define and implement these functions
@@ -55,6 +62,7 @@ int similarity( Player &a, Player &b );
  * player a and player b.
  */
 
+int similarity( Player &a, Player &b );
 
 /* count()  -- should return the number if items in a set */
 
