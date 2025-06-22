@@ -55,9 +55,9 @@ std::vector<Player> filter_by_flag(const std::vector<Player>& all_players, const
 					std::cout << q.name << std::endl;
 				}
 				std::string new_player;
-				std::cin >> new_player;
+				getline(std::cin, new_player);
 				std::vector<std::string> new_players = {new_player};
-				filter_by_flag(all_players, flags, new_players, headers);
+				return filter_by_flag(all_players, flags, new_players, headers);
 			}
 			return players;
 		}
