@@ -1,4 +1,5 @@
 #include <iostream>
+#include <iomanip>
 #include <ctime>
 #include <fstream>
 #include <sstream>
@@ -131,7 +132,7 @@ std::vector<Player> filter_by_flag(const std::vector<Player>& all_players, const
 		
 	}
 
-	//name is last resort flag - check if need most similar or print out player info
+	//name is last resort flag - check if need most similar else print out player info
 	for (std::string flag : flags)
 	{
 		std::string name;
@@ -145,6 +146,7 @@ std::vector<Player> filter_by_flag(const std::vector<Player>& all_players, const
 		
 		if (flag == "--findmostsimilar") 
 		{
+
 			std::vector<int> similarties_between_player;
 			Player a;
 
@@ -162,7 +164,7 @@ std::vector<Player> filter_by_flag(const std::vector<Player>& all_players, const
 				}
 			}
 
-			int most_similar = max(similarties_between_player);
+			int most_similar = min(similarties_between_player);
 
 			for (Player c : all_players)
 			{
@@ -171,6 +173,28 @@ std::vector<Player> filter_by_flag(const std::vector<Player>& all_players, const
 				}
 			}
 			
+		}
+
+
+		else if (flag == "--name")
+		{
+			std::string name;
+
+			for (std::string input : non_input_flags)
+			{
+				name += input + " ";
+			}
+
+			name.pop_back();
+			name = to_lower(name);
+
+			for (Player p : all_players)
+			{
+				if (p.name == name){
+					std::cout << name;
+					print_player_infocard(p);
+				}
+			}
 		}
 
 	}
@@ -374,24 +398,22 @@ int ageToYearBorn ( Player &p )
 
 
 
-// compares two players stats of equal length, returns [0, 100] similarity score
+// compares two players stats of equal length, returns Euclidean Distance between vector of stats
 
 int similarity( Player &a, Player &b )
 {
 	int similarity_percent = 0;
 
-	std::vector<int> player_a_stats = a.stats;
-	std::vector<int> player_b_stats = b.stats;
 
 	int min = std::min(a.stats.size(), b.stats.size());
-	double summation = 0;
+	double summation = 0.0;
 
 	for (int i = 0; i < min; i++){
 		summation += std::pow( a.stats.at(i) - b.stats.at(i), 2);
 	}
 
-	summation = std::sqrt(summation);
-	similarity_percent = (1/(1 + summation)) * 100;
+	similarity_percent = std::sqrt(summation);
+	
 
 	return similarity_percent;
 }
@@ -435,4 +457,34 @@ int max(std::vector<int>& nums)
 	}
 	
 	return max;
+}
+
+
+int min (std::vector<int>& nums){
+	int min = nums.at(0);
+	for (int num : nums){
+		if (num < min){
+			min = num;
+		}
+	}
+	return min;
+}
+
+// COMPLETE NAME AND FIX MOST SIMLIAR 
+
+void print_player_infocard(Player &p){
+	
+	char buffer[100];
+	std::cout << "####################################################" << std::endl;
+	snprintf(buffer, sizeof(buffer), "## Name: %-40s ##", p.name.c_str() ); 								// each line should sum to 52
+	std::cout << buffer << std::endl;
+	snprintf(buffer, sizeof(buffer), "## Nation: %-38s ##", p.country.c_str() );
+	std::cout << buffer << std::endl;
+  	snprintf(buffer, sizeof(buffer),"## Age: %-41d ##", p.age);
+	std::cout << buffer << std::endl;
+	snprintf(buffer, sizeof(buffer), "## Height: %12.2d cm", p.height_cm);
+	std::cout << buffer << std::endl;
+	snprintf(buffer, sizeof(buffer), "## Weight: %12.2d kg ##", p.weight_kg);
+	std::cout << buffer << std::endl;
+	std::cout << "####################################################" << std::endl;
 }
