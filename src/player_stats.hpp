@@ -34,7 +34,7 @@ struct Player {
 int ageToYearBorn ( Player &p );
 void print_histogram(Player& p, const std::vector<std::string> &headers);
 const std::string to_lower(std::string& word);
-void print_player_infocard(Player &p);
+void print_player_infocard(Player &p, std::vector<Player> all_players);
 const std::string fixUserInput(const std::vector<std::string>& non_flag_inputs);
 
 
@@ -51,7 +51,15 @@ const std::vector<std::string> find_headers(const std::string &filename);
 
 
 std::vector<Player> filter_by_flag(const std::vector<Player>& all_players, const std::vector<std::string>& flags, const std::vector<std::string>& non_input_flags, const std::vector<std::string>& headers);
-std::vector<Player> create_chart(const std::vector<Player>& all_players, const std::string& input, const std::vector<std::string>& headers);
+std::vector<Player> create_chart(const std::vector<Player>& all_players, std::string& input, const std::vector<std::string>& headers);
+std::vector<Player> country_filter(const std::vector<Player>& players, std::string country);
+std::vector<Player> club_filter(const std::vector<Player>& all_players, std::string club_input);
+
+
+std::vector<Player> marking_filter(const std::vector<Player>& all_players, std::string filter);
+std::vector<Player> agility_filter(const std::vector<Player>& all_players, std::string filter);
+std::vector<Player> vision_filter(const std::vector<Player>& all_players, std::string filter);
+
 
 /* You will need to define and implement these functions
  * How exactly is up to you,

@@ -14,12 +14,17 @@ int main(int argc, char *argv[]) {
 	}
 
 	
-
-
-	
 	const std::vector<std::string> arguments = parse_arguments(argc, argv);
 
 	const std::vector<std::string> flags = find_flags(arguments);
+
+	if (!check_flags(flags))
+	{
+		std::cout << "Please enter a valid flag: " << std::endl;
+		std::cout << "Examples of valid flags are: --name, --country, --club, --vision, --agility, --marking, --value" << std::endl;
+		return 1;
+	}
+
 	const std::vector<std::string> filters = non_flag_inputs(arguments);
 	const std::string fileName = find_csv(arguments);
 
@@ -29,9 +34,6 @@ int main(int argc, char *argv[]) {
 	
 
 	std::vector<Player> filtered = filter_by_flag(players, flags, filters, headers);
-
-
-
 
 
 	return 0;

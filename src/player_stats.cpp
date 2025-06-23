@@ -38,191 +38,13 @@ const std::string fixUserInput(const std::vector<std::string>& non_flag_inputs)
 
 	if (!userInput.empty())
 	{
-		userInput = to_lower(userInput);
+		
 		userInput.pop_back();
 	}
 
 	return userInput;
 }
 
-
-std::vector<Player> create_chart(const std::vector<Player>& all_players, const std::string& input, const std::vector<std::string>& headers)
-{
-	std::vector<Player> filtered_players;
-	
-	for (Player p : all_players)
-	{
-		
-
-		if (p.name.find(input) != std::string::npos)
-		{
-			filtered_players.push_back(p);
-		}
-	}
-
-	size_t filtered_players_size = filtered_players.size();
-
-	if (filtered_players_size < 1) 
-	{
-		std::cout << "No players available" << std::endl;
-		return {};
-	}
-
-	else if (filtered_players_size == 1)
-	{
-		std::cout << "You choose : " << filtered_players.at(0).name << std::endl;
-		print_histogram(filtered_players.at(0), headers);
-		return filtered_players;
-	}		
-
-	else 
-	{
-		std::cout << "Choose one of the following players: " << std::endl;
-		for (Player new_player : filtered_players)
-		{
-			std::cout << new_player.name << std::endl;
-		}
-		std::string new_name;
-		std::cin >> new_name;
-		new_name = to_lower(new_name);
-		return create_chart(filtered_players, new_name, headers);
-	}
-
-}
-
-
-std::vector<Player> filter_by_flag(const std::vector<Player>& all_players, const std::vector<std::string>& flags, const std::vector<std::string>& non_input_flags, const std::vector<std::string>& headers)
-{
-	std::vector<Player> players;
-
-	std::string userInput = fixUserInput(non_input_flags);
-
-
-	for (std::string flag : flags)
-	{
-		if (flag == "--chart")
-		{
-			players = create_chart(all_players, userInput, headers);
-		}
-
-		else if (flag == "--country")
-		{
-			std::string country = non_input_flags.at(0);
-			
-			
-			for (Player p : all_players)
-			{
-				if (p.country == country)
-				{
-					players.push_back(p);
-					std::cout << p.name << std::endl;
-				}
-			}
-
-			if (players.size() < 1)
-			{
-				std::cout << "No players from this country." << std::endl;
-			}
-		}
-
-
-
-		else if (flag == "--club")
-		{
-			std::string club;
-
-			for (std::string input : non_input_flags)
-			{
-				club += input + " ";
-			}
-			
-			std::cout << club << std::endl;
-
-			for (Player p : all_players)
-			{
-				if (p.club == club)
-				{
-					players.push_back(p);
-					std::cout << p.name << std::endl;
-				}
-			}
-
-			if (players.size() < 1){
-				std::cout << "No players from this club." << std::endl;
-			}
-		}
-		
-	}
-
-	//name is last resort flag - check if need most similar else print out player info
-	for (std::string flag : flags)
-	{
-		std::string name;
-		for (std::string input : non_input_flags){
-			name += input + " ";
-		}
-		
-		name = to_lower(name);
-		name.pop_back();
-
-		
-		if (flag == "--findmostsimilar") 
-		{
-
-			std::vector<int> similarties_between_player;
-			Player a;
-
-			for (Player p : all_players)
-			{
-				if (p.name == name){
-					a = p;
-				}
-			}
-
-			for (Player b : all_players)
-			{
-				if (a.name != b.name){
-					similarties_between_player.push_back(similarity(a, b));
-				}
-			}
-
-			int most_similar = min(similarties_between_player);
-
-			for (Player c : all_players)
-			{
-				if (most_similar == similarity(a, c)){
-					std::cout << c.name << std::endl;
-				}
-			}
-			
-		}
-
-
-		else if (flag == "--name")
-		{
-			std::string name;
-
-			for (std::string input : non_input_flags)
-			{
-				name += input + " ";
-			}
-
-			name.pop_back();
-			name = to_lower(name);
-
-			for (Player p : all_players)
-			{
-				if (p.name == name)
-				{
-					print_player_infocard(p);
-				}
-			}
-		}
-
-	}
-
-	return players;
-}
 
 // stores command line inputs into vec
 const std::vector<std::string> parse_arguments(int argc, char* argv[])
@@ -241,6 +63,7 @@ const std::vector<std::string> parse_arguments(int argc, char* argv[])
 	
 
 }
+
 
 const std::string find_csv(const std::vector<std::string>& arguments) 
 {
@@ -390,31 +213,479 @@ const std::vector<Player> create_player_vector(const std::string& fileName)
 	
 }
 
-
-
-
-/* We will have to assume the player data is up-to-date */
-/* Take in reference to player, returns year born */
-int ageToYearBorn ( Player &p ) 
+std::vector<Player> create_chart(const std::vector<Player>& all_players, std::string& input, const std::vector<std::string>& headers)
 {
-	std::cout << "Calculating what year " << p.name << " was born " << std::endl;
-	int age = p.age;
+	std::vector<Player> filtered_players;
+	input = to_lower(input);
 
-	time_t today = time( NULL ); // gives me a timestape
-	tm* local_time = localtime( &today ); // gives me a struct of time info
-	/* from the documentation about localtime()  see https://cplusplus.com/reference/ctime/localtime/
-	 * "The returned value points to an internal object whose validity or value may be altered 
-	 * by any subsequent call to gmtime or localtime."
-	 * Thus, we should copy the info out before we call the function again.
-	 */
-	int month = local_time->tm_mon + 1; // tm_mon is month 0-11 (so we add 1).
-	int year = local_time->tm_year; // gives us the year from 1900
-	year += 1900;
-	std::cout << "Today is the " << month << " month of " << year << std::endl;
-	int yearBorn = year - age; // calculate the year born by subtracting age
-	std::cout << p.name << " was born in the year " << yearBorn << std::endl;
-	return yearBorn;
+	for (Player p : all_players)
+	{
+		
+		if (p.name.find(input) != std::string::npos)
+		{
+			filtered_players.push_back(p);
+		}
+	}
+
+	size_t filtered_players_size = filtered_players.size();
+
+	if (filtered_players_size < 1) 
+	{
+		std::cout << "No players available" << std::endl;
+		return {};
+	}
+
+	else if (filtered_players_size == 1)
+	{
+		std::cout << "You choose : " << filtered_players.at(0).name << std::endl;
+		print_histogram(filtered_players.at(0), headers);
+		return filtered_players;
+	}		
+
+	else 
+	{
+		std::cout << "Choose one of the following players: " << std::endl;
+		for (Player new_player : filtered_players)
+		{
+			std::cout << new_player.name << std::endl;
+		}
+		std::string new_name;
+		std::getline(std::cin, new_name);
+		new_name = to_lower(new_name);
+		return create_chart(filtered_players, new_name, headers);
+	}
+	
 }
+
+std::vector<Player> country_filter(const std::vector<Player>& players, std::string country)
+{
+
+	std::vector<Player> players_from_country;
+	country[0] = toupper(country[0]);
+	
+
+	for (Player p : players)
+	{
+		if (p.country == country)
+		{
+			players_from_country.push_back(p);
+		}
+	}
+
+	size_t filtered_players_size = players_from_country.size();
+	if (filtered_players_size < 1)
+	{
+		std::cout << "No players from this country." << std::endl;
+		return {};
+	}
+	else
+	{
+		for (Player filtered_player : players_from_country)
+		{
+			std::cout << filtered_player.name << std::endl;
+		}
+		return players_from_country;
+	}
+}
+
+
+std::vector<Player> club_filter(const std::vector<Player>& all_players, std::string club_input)
+{
+
+	std::vector<Player> players_by_club;
+	club_input += " ";
+
+	for (Player p : all_players)
+	{
+		if (p.club == club_input)
+		{
+			players_by_club.push_back(p);
+		}
+	}
+
+	size_t club_players_size = players_by_club.size();
+
+	if (club_players_size < 1)
+	{
+		std::cout << "There are no players from this club." << std::endl;
+		return {};
+	}
+	else 
+	{
+		for (Player p : players_by_club)
+		{
+			std::cout << p.name << std::endl;
+		}
+		return players_by_club;
+	}
+}
+
+
+std::vector<Player> value_filter(const std::vector<Player>& all_players, std::string player_name)
+{
+	player_name = to_lower(player_name);
+	std::vector<Player> players_with_name;
+	std::vector<std::string> corresponding_values;
+
+	for (Player p : all_players)
+	{
+		if (p.name.find(player_name) != std::string::npos)
+		{
+			players_with_name.push_back(p);
+			corresponding_values.push_back(p.value);
+		}
+	}
+
+	size_t player_with_name_size = players_with_name.size();
+
+	if (player_with_name_size < 1)
+	{
+		std::cout << "There are no players with this name. " << std::endl;
+		return {};
+	}
+
+	else if (player_with_name_size == 1) 
+	{
+		std::cout << corresponding_values.at(0) << std::endl;
+		return players_with_name;
+	}
+	
+	else
+	{
+		std::cout << "Choose one of the following players: " << std::endl;
+		for (Player& p : players_with_name)
+		{
+			std::cout << p.name << std::endl;
+		}
+		std::string new_player;
+		std::getline(std::cin, new_player);
+		return value_filter(players_with_name, new_player);
+
+	}
+
+}
+
+
+std::vector<Player> vision_filter(const std::vector<Player>& all_players, std::string filter)
+{	
+	std::vector<Player> vision_players;
+
+	if (filter.at(0) == '<')
+	{
+		filter = filter.substr(1);
+		
+		int num_filter = stoi(filter);
+
+		for (Player p : all_players)
+		{
+			if (p.stats.at(9) < num_filter)
+			{
+				vision_players.push_back(p);
+			}
+		}
+	}
+
+	else if (filter.at(0) == '>')
+	{
+		filter = filter.substr(1);
+		
+		int num_filter = stoi(filter);
+
+		for (Player p : all_players)
+		{
+			if (p.stats.at(9) > num_filter)
+			{
+				vision_players.push_back(p);
+			}
+		}
+	}
+
+	else 
+	{	
+		if (filter.at(0) == '=')
+		{
+			filter = filter.substr(1);
+		}
+		for (Player p : all_players)
+		{
+			int num_filter = stoi(filter);
+			if (p.stats.at(9) == num_filter)
+			{
+				vision_players.push_back(p);
+			}
+		}
+		
+	}
+
+	for (Player& p : vision_players)
+	{
+		std::cout << p.name << std::endl;
+	}
+
+	if (vision_players.size() < 1)
+	{
+		std::cout << "No player available." << std::endl;
+	}
+	return vision_players;
+ 
+}
+
+std::vector<Player> agility_filter(const std::vector<Player>& all_players, std::string filter)
+{	
+	std::vector<Player> agility_players;
+
+	if (filter.at(0) == '<')
+	{
+		filter = filter.substr(1);
+		
+		int num_filter = stoi(filter);
+
+		for (Player p : all_players)
+		{
+			if (p.stats.at(19) < num_filter)
+			{
+				agility_players.push_back(p);
+			}
+		}
+	}
+
+	else if (filter.at(0) == '>')
+	{
+		filter = filter.substr(1);
+		
+		int num_filter = stoi(filter);
+
+		for (Player p : all_players)
+		{
+			if (p.stats.at(19) > num_filter)
+			{
+				agility_players.push_back(p);
+			}
+		}
+	}
+
+	else 
+	{	
+		if (filter.at(0) == '=')
+		{
+			filter = filter.substr(1);
+		}
+		for (Player p : all_players)
+		{
+			int num_filter = stoi(filter);
+			if (p.stats.at(19) == num_filter)
+			{
+				agility_players.push_back(p);
+			}
+		}
+		
+	}
+
+	for (Player& p : agility_players)
+	{
+		std::cout << p.name << std::endl;
+	}
+
+	if (agility_players.size() < 1)
+	{
+		std::cout << "No player available." << std::endl;
+	}
+	return agility_players;
+ 
+}
+
+std::vector<Player> marking_filter(const std::vector<Player>& all_players, std::string filter)
+{	
+	std::vector<Player> marking_players;
+
+	if (filter.at(0) == '<')
+	{
+		filter = filter.substr(1);
+		
+		int num_filter = stoi(filter);
+
+		for (Player p : all_players)
+		{
+			if (p.stats.at(2) < num_filter)
+			{
+				marking_players.push_back(p);
+			}
+		}
+	}
+
+	else if (filter.at(0) == '>')
+	{
+		filter = filter.substr(1);
+		
+		int num_filter = stoi(filter);
+
+		for (Player p : all_players)
+		{
+			if (p.stats.at(2) > num_filter)
+			{
+				marking_players.push_back(p);
+			}
+		}
+	}
+
+	else 
+	{	
+		if (filter.at(0) == '=')
+		{
+			filter = filter.substr(1);
+		}
+		for (Player p : all_players)
+		{
+			int num_filter = stoi(filter);
+			if (p.stats.at(2) == num_filter)
+			{
+				marking_players.push_back(p);
+			}
+		}
+		
+	}
+
+	for (Player& p : marking_players)
+	{
+		std::cout << p.name << std::endl;
+	}
+
+	if (marking_players.size() < 1)
+	{
+		std::cout << "No player available." << std::endl;
+	}
+	return marking_players;
+ 
+}
+
+
+std::vector<Player> find_most_similar(const std::vector<Player>& players,  Player& a, std::string name_of_p1)
+{
+	std::vector<Player> all_other_players;
+	std::vector<int> similarity_scores;
+
+	for (Player p : players)
+	{
+		
+		if (p.name != name_of_p1)
+		{
+			all_other_players.push_back(p);
+			similarity_scores.push_back(similarity(a, p));
+		}
+	}
+
+	
+
+	int most_similar = min(similarity_scores);
+	
+	for (Player player_b : all_other_players)
+	{
+		if (most_similar == similarity(a, player_b)){
+			std::cout << player_b.name << std::endl;
+		}
+	}
+	
+	return all_other_players;
+}
+
+std::vector<Player> filter_by_flag(const std::vector<Player>& all_players, const std::vector<std::string>& flags, const std::vector<std::string>& non_input_flags, const std::vector<std::string>& headers)
+{
+	std::vector<Player> players;
+
+	std::string userInput = fixUserInput(non_input_flags);
+
+	bool has_find_most_similiar = false;
+
+	for (std::string flag : flags)
+	{
+		if (flag == "--chart")
+		{
+			players = create_chart(all_players, userInput, headers);
+			return players;
+			
+		}
+
+		else if (flag == "--country")
+		{	
+			players = country_filter(all_players, userInput);
+		}
+
+		else if (flag == "--club")
+		{
+			players = club_filter(all_players, userInput);
+		}
+
+		else if (flag == "--value")
+		{
+			players = value_filter(all_players, userInput);
+			return players;
+			
+			
+		}
+
+		else if (flag == "--vision" || flag == "--agility" || flag == "--marking")
+		{
+			if (flag == "--vision")
+			{
+				players = vision_filter(all_players, userInput);
+			}
+			
+			if (flag == "--agility")
+			{
+				players = agility_filter(all_players, userInput);
+			}
+
+			if (flag == "--marking")
+			{
+				players = marking_filter(all_players, userInput);
+			}
+
+		}
+		
+
+		else if (flag == "--name")
+		{
+			Player player_a;
+			userInput = to_lower(userInput);
+			
+			for (Player p : all_players)
+			{
+				p.name = to_lower(p.name);
+
+				if (p.name == userInput)
+				{
+					player_a = p;
+				}
+			}
+
+			for (std::string new_flag : flags)
+			{
+				if (new_flag == "--findmostsimilar")
+				{
+					has_find_most_similiar = true;
+				}
+			}
+
+			if (has_find_most_similiar)
+			{
+				
+				players = find_most_similar(all_players, player_a, userInput);
+				
+			}
+			else
+			{
+				print_player_infocard(player_a, all_players);
+				
+			}
+		}
+		
+	}
+
+	return players;
+}
+
+
+
 
 
 
@@ -492,21 +763,62 @@ int min (std::vector<int>& nums){
 	return min;
 }
 
-// COMPLETE NAME AND FIX MOST SIMLIAR 
 
-void print_player_infocard(Player &p){
-	
-	char buffer[100];
-	std::cout << "####################################################" << std::endl;
-	snprintf(buffer, sizeof(buffer), "## Name: %-40s ##", p.name.c_str() ); 								// each line should sum to 52
-	std::cout << buffer << std::endl;
-	snprintf(buffer, sizeof(buffer), "## Nation: %-38s ##", p.country.c_str() );
-	std::cout << buffer << std::endl;
-  	snprintf(buffer, sizeof(buffer),"## Age: %-41d ##", p.age);
-	std::cout << buffer << std::endl;
-	snprintf(buffer, sizeof(buffer), "## Height (cm): %-33d ##", p.height_cm);
-	std::cout << buffer << std::endl;
-	snprintf(buffer, sizeof(buffer), "## Weight (kg): %-32d  ##", p.weight_kg);
-	std::cout << buffer << std::endl;
-	std::cout << "####################################################" << std::endl;
+void print_player_infocard(Player &p, std::vector<Player> all_players)
+{
+	bool does_player_exist = false;
+	for (Player each_player : all_players)
+	{	
+		if (each_player.name == p.name)
+		{
+			does_player_exist = true;
+		}
+	}
+	if (does_player_exist)
+	{
+		char buffer[100];
+		std::cout << "####################################################" << std::endl;
+		snprintf(buffer, sizeof(buffer), "## Name: %-40s ##", p.name.c_str() ); 								// each line should sum to 52
+		std::cout << buffer << std::endl;
+		snprintf(buffer, sizeof(buffer), "## Nation: %-38s ##", p.country.c_str() );
+		std::cout << buffer << std::endl;
+		snprintf(buffer, sizeof(buffer),"## Age: %-41d ##", p.age);
+		std::cout << buffer << std::endl;
+		snprintf(buffer, sizeof(buffer), "## Height (cm): %-33d ##", p.height_cm);
+		std::cout << buffer << std::endl;
+		snprintf(buffer, sizeof(buffer), "## Weight (kg): %-32d  ##", p.weight_kg);
+		std::cout << buffer << std::endl;
+		std::cout << "####################################################" << std::endl;
+	}
+	else{
+		std::cout << "No player available" << std::endl;
+	}
 }
+
+
+
+
+/* We will have to assume the player data is up-to-date */
+/* Take in reference to player, returns year born */
+int ageToYearBorn ( Player &p ) 
+{
+	std::cout << "Calculating what year " << p.name << " was born " << std::endl;
+	int age = p.age;
+
+	time_t today = time( NULL ); // gives me a timestape
+	tm* local_time = localtime( &today ); // gives me a struct of time info
+	/* from the documentation about localtime()  see https://cplusplus.com/reference/ctime/localtime/
+	 * "The returned value points to an internal object whose validity or value may be altered 
+	 * by any subsequent call to gmtime or localtime."
+	 * Thus, we should copy the info out before we call the function again.
+	 */
+	int month = local_time->tm_mon + 1; // tm_mon is month 0-11 (so we add 1).
+	int year = local_time->tm_year; // gives us the year from 1900
+	year += 1900;
+	std::cout << "Today is the " << month << " month of " << year << std::endl;
+	int yearBorn = year - age; // calculate the year born by subtracting age
+	std::cout << p.name << " was born in the year " << yearBorn << std::endl;
+	return yearBorn;
+}
+
+
