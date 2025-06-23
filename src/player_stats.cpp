@@ -763,7 +763,7 @@ int min (std::vector<int>& nums){
 	return min;
 }
 
-
+// prints player infocard 
 void print_player_infocard(Player &p, std::vector<Player> all_players)
 {
 	bool does_player_exist = false;
