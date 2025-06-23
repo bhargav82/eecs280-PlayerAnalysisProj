@@ -24,63 +24,85 @@ bool check_flags(const std::vector<std::string>& flags)
 	}
 
 	return false;
+
 }
+
+
+const std::string fixUserInput(const std::vector<std::string>& non_flag_inputs)
+{
+	std::string userInput;
+	for (std::string flag : non_flag_inputs)
+	{
+		userInput += flag + " ";
+	}
+
+	if (!userInput.empty())
+	{
+		userInput = to_lower(userInput);
+		userInput.pop_back();
+	}
+
+	return userInput;
+}
+
+
+std::vector<Player> create_chart(const std::vector<Player>& all_players, const std::string& input, const std::vector<std::string>& headers)
+{
+	std::vector<Player> filtered_players;
+	
+	for (Player p : all_players)
+	{
+		
+
+		if (p.name.find(input) != std::string::npos)
+		{
+			filtered_players.push_back(p);
+		}
+	}
+
+	size_t filtered_players_size = filtered_players.size();
+
+	if (filtered_players_size < 1) 
+	{
+		std::cout << "No players available" << std::endl;
+		return {};
+	}
+
+	else if (filtered_players_size == 1)
+	{
+		std::cout << "You choose : " << filtered_players.at(0).name << std::endl;
+		print_histogram(filtered_players.at(0), headers);
+		return filtered_players;
+	}		
+
+	else 
+	{
+		std::cout << "Choose one of the following players: " << std::endl;
+		for (Player new_player : filtered_players)
+		{
+			std::cout << new_player.name << std::endl;
+		}
+		std::string new_name;
+		std::cin >> new_name;
+		new_name = to_lower(new_name);
+		return create_chart(filtered_players, new_name, headers);
+	}
+
+}
+
 
 std::vector<Player> filter_by_flag(const std::vector<Player>& all_players, const std::vector<std::string>& flags, const std::vector<std::string>& non_input_flags, const std::vector<std::string>& headers)
 {
 	std::vector<Player> players;
 
+	std::string userInput = fixUserInput(non_input_flags);
+
+
 	for (std::string flag : flags)
 	{
 		if (flag == "--chart")
 		{
-			std::string name;
-			for (std::string input : non_input_flags){
-				name += input + " ";
-			}
-			
-			name = to_lower(name);
-			name.pop_back();
-			
-			for (Player p : all_players) 
-			{
-				if (p.name.find(name) != std::string::npos) 
-				{
-					players.push_back(p);
-					
-				}
-			}
-
-			size_t players_size = players.size();
-
-			if (players_size < 1)
-			{
-				std::cout << "No player found" << std::endl;
-			}
-
-			else if (players_size == 1)
-			{
-				std::cout << "You chose player: " << players.at(0).name << std::endl;
-				print_histogram(players.at(0), headers);
-				
-			}
-
-			else
-			{
-				std::cout << "Choose one of the following players: " << std::endl;
-
-				for (Player p : players)
-				{
-					std::cout << p.name << std::endl;
-				}
-
-				std::string new_player;
-				getline(std::cin, new_player);
-				std::vector<std::string> new_players = {new_player};
-				return filter_by_flag(all_players, flags, new_players, headers);
-			}
-
-			return players;
+			players = create_chart(all_players, userInput, headers);
 		}
 
 		else if (flag == "--country")
@@ -190,8 +212,8 @@ std::vector<Player> filter_by_flag(const std::vector<Player>& all_players, const
 
 			for (Player p : all_players)
 			{
-				if (p.name == name){
-					std::cout << name;
+				if (p.name == name)
+				{
 					print_player_infocard(p);
 				}
 			}
@@ -482,9 +504,9 @@ void print_player_infocard(Player &p){
 	std::cout << buffer << std::endl;
   	snprintf(buffer, sizeof(buffer),"## Age: %-41d ##", p.age);
 	std::cout << buffer << std::endl;
-	snprintf(buffer, sizeof(buffer), "## Height: %12.2d cm", p.height_cm);
+	snprintf(buffer, sizeof(buffer), "## Height (cm): %-33d ##", p.height_cm);
 	std::cout << buffer << std::endl;
-	snprintf(buffer, sizeof(buffer), "## Weight: %12.2d kg ##", p.weight_kg);
+	snprintf(buffer, sizeof(buffer), "## Weight (kg): %-32d  ##", p.weight_kg);
 	std::cout << buffer << std::endl;
 	std::cout << "####################################################" << std::endl;
 }
