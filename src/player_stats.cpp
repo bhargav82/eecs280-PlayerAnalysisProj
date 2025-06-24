@@ -63,7 +63,8 @@ const std::string find_csv(const std::vector<std::string>& arguments)
 {
 	
 	for (std::string arg : arguments){
-		if (arg.find(".csv") != std::string::npos) {
+		if (arg.find(".csv") != std::string::npos) 
+		{
 			return arg;
 		}	
 	}
@@ -81,7 +82,8 @@ const std::vector<std::string> find_flags(const std::vector<std::string>& argume
 	for (std::string arg : arguments)
 	{
 		std::string arg_string = arg;
-		if (arg_string.find("--") != std::string::npos){
+		if (arg_string.find("--") != std::string::npos)
+		{
 			flags.push_back(arg_string);
 		}
 	}
@@ -545,17 +547,50 @@ std::vector<Player> find_most_similar(const std::vector<Player>& players,  Playe
 	return all_other_players;
 }
 
+
+std::vector<Player> find_1_player(const std::vector<Player>& multiple_players, std::string input)
+{
+	input = to_lower(input);
+	std::vector<Player> one_player;
+	for (Player p : multiple_players)
+	{
+		if (p.name.find(input) != std::string::npos)
+		{
+			one_player.push_back(p);
+		}
+	}
+	
+	if (one_player.size() <= 1)
+	{
+		return one_player;
+	}
+	else
+	{
+		std::cout << "Choose one of the following players: " << std::endl;
+		for (Player p : one_player)
+		{
+			std::cout << p.name << std::endl;
+		}
+		std::string new_input;
+		getline(std::cin, new_input);
+		return find_1_player(one_player, new_input);
+	}
+}
+
+
 std::vector<Player> filter_by_flag(const std::vector<Player>& all_players, const std::vector<std::string>& flags, const std::vector<std::string>& non_input_flags, const std::vector<std::string>& headers)
 {
 	std::vector<Player> players;
 	std::string userInput = fixUserInput(non_input_flags);
 	bool has_find_most_similiar = false;
+	bool has_chart = false;
 
 	for (std::string flag : flags)
 	{
 		if (flag == "--chart")
 		{
 			players = create_chart(all_players, userInput, headers);
+			has_chart = true;
 			return players;																	// could have --chart and --name, don't want infocard, just histogram, so return after
 		}
 		else if (flag == "--country")
@@ -590,17 +625,18 @@ std::vector<Player> filter_by_flag(const std::vector<Player>& all_players, const
 		}
 		else if (flag == "--name")
 		{
-			Player player_a;
-			userInput = to_lower(userInput);
+			std::vector<Player> filtered_players = find_1_player(all_players, userInput);
 			
-			for (Player p : all_players)
+			if (filtered_players.empty())
 			{
-				p.name = to_lower(p.name);
-				if (p.name == userInput)
-				{
-					player_a = p;
-				}
+				std::cout << "There are no players with this name." << std::endl;
+				continue;
 			}
+
+			
+			Player player_a = filtered_players.at(0);
+
+
 			for (std::string new_flag : flags)
 			{
 				if (new_flag == "--findmostsimilar")										// don't want to print most similar player and infocard
@@ -611,10 +647,10 @@ std::vector<Player> filter_by_flag(const std::vector<Player>& all_players, const
 			if (has_find_most_similiar)
 			{
 				
-				players = find_most_similar(all_players, player_a, userInput);
+				players = find_most_similar(all_players, player_a, player_a.name);
 				
 			}
-			else
+			else if (!has_chart)
 			{
 				print_player_infocard(player_a, all_players);
 				
@@ -753,3 +789,7 @@ int ageToYearBorn ( Player &p )
 }
 
 
+
+
+// FIX --chart and --name when reading in multiple times
+// ADD tests.cpp and fix readme

@@ -26,7 +26,20 @@ int main(int argc, char *argv[]) {
 	}
 
 	const std::vector<std::string> filters = non_flag_inputs(arguments);
+
+	if (filters.empty())
+	{
+		std::cout << "Please input filters, such as the name of the player, club, country, or other attributes." << std::endl;
+		return 1;
+	}
+
 	const std::string fileName = find_csv(arguments);
+
+	if (fileName == "No File Input")
+	{
+		std::cout << "Please enter a valid file name." << std::endl;
+		return 1;
+	}
 
 
 	const std::vector<std::string> headers = find_headers(fileName);
