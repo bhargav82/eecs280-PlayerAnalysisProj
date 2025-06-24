@@ -37,8 +37,7 @@ const std::string fixUserInput(const std::vector<std::string>& non_flag_inputs)
 	}
 
 	if (!userInput.empty())
-	{
-		
+	{	
 		userInput.pop_back();
 	}
 
@@ -46,12 +45,9 @@ const std::string fixUserInput(const std::vector<std::string>& non_flag_inputs)
 }
 
 
-// stores command line inputs into vec
+// by storing argumentss in vector, can extract flags, files, and other inputs, terminal input doesn't need to be in specific order
 const std::vector<std::string> parse_arguments(int argc, char* argv[])
-{
-	
-
-	// return vector of arguments
+{	
 	std::vector<std::string> arguments; 
 	int counter = 0;
 	while (counter < argc) 
@@ -60,8 +56,6 @@ const std::vector<std::string> parse_arguments(int argc, char* argv[])
 	}
 
 	return arguments;
-	
-
 }
 
 
@@ -78,7 +72,7 @@ const std::string find_csv(const std::vector<std::string>& arguments)
 }
 
 
-// finds flags (inputs with "--")
+
 const std::vector<std::string> find_flags(const std::vector<std::string>& arguments)
 {
 
@@ -95,7 +89,6 @@ const std::vector<std::string> find_flags(const std::vector<std::string>& argume
 }
 
 
-// store all inputs except flags and files
 const std::vector<std::string> non_flag_inputs(const std::vector<std::string>& arguments)
 {
 
@@ -103,6 +96,7 @@ const std::vector<std::string> non_flag_inputs(const std::vector<std::string>& a
 
 	for (std::string arg : arguments)
 	{
+		// only store arguments that aren't flags or files (absolute or relative paths)
 		if (arg.find("-") == std::string::npos && arg.find(".") == std::string::npos && arg.find("/") == std::string::npos)
 		{
 			filters.push_back(arg);
@@ -124,8 +118,10 @@ const std::vector<std::string> find_headers(const std::string &filename)
 		std::cerr << "Error opening up file: " << filename << std::endl;
 	}
 
+	// only read in first line of csv
 	std::string first_line;
 	getline(inputFile, first_line);
+
 	std::stringstream columns(first_line);
 	std::string data;
 	std::vector<std::string> headers;
@@ -135,16 +131,15 @@ const std::vector<std::string> find_headers(const std::string &filename)
 		headers.push_back(data);
 	}
 
-
+	inputFile.close();
 	return headers;
 }
 
-// parse file and convert each line to Player (struct), store in a vector of Players
+
 const std::vector<Player> create_player_vector(const std::string& fileName) 
 {
 
 	std::ifstream inputFile;
-
   	inputFile.open(fileName);
 
   	if (!inputFile.is_open()) 
@@ -152,16 +147,16 @@ const std::vector<Player> create_player_vector(const std::string& fileName)
      	std::cerr << "Error opening up file: " << fileName << std::endl;
   	}
 
+	// skip first line (headers)
 	std::string first_line;
 	getline(inputFile, first_line);
-	
 
 	std::vector<Player> all_players;
 	std::string line;
 
   	while (getline(inputFile, line)) 
 	{
-
+		// new instance of player for each line
 		Player new_player;
 
 		std::vector<std::string> player_info;
@@ -170,12 +165,14 @@ const std::vector<Player> create_player_vector(const std::string& fileName)
 		std::stringstream line_stringstream(line);
 		std::string token;
 
+		// split line by commas, store in a vector (we know what each index should be)
     	while (getline(line_stringstream, token, ',')) 
 		{
 			player_info.push_back(token);
 		}
 
-		new_player.name = to_lower(player_info.at(0));
+		// first six columns are known types
+		new_player.name = to_lower(player_info.at(0));									// change name to lowercase, makes it easy to check against user input
 		new_player.country = player_info.at(1);
 		new_player.height_cm = std::stoi(player_info.at(2));
 		new_player.weight_kg = std::stoi(player_info.at(3));
@@ -183,12 +180,10 @@ const std::vector<Player> create_player_vector(const std::string& fileName)
 		new_player.club = player_info.at(5);
 
 		
+		// go through stats, try to convert to an int, if not must be "None" or "" -> change to 0
 		size_t player_info_length = player_info.size();
-
-
 		for (size_t i = 6; i < player_info_length - 1; i++) 
 		{
-
 			try 
 			{
 				new_player.stats.push_back(std::stoi(player_info.at(i)));
@@ -204,19 +199,16 @@ const std::vector<Player> create_player_vector(const std::string& fileName)
 		all_players.push_back(new_player);
 
   	}
-
-
-
 	inputFile.close();
 
 	return all_players;
-	
 }
+
 
 std::vector<Player> create_chart(const std::vector<Player>& all_players, std::string& input, const std::vector<std::string>& headers)
 {
 	std::vector<Player> filtered_players;
-	input = to_lower(input);
+	input = to_lower(input);															// change user input to lowercase to match name (already lowercase)
 
 	for (Player p : all_players)
 	{
@@ -228,7 +220,6 @@ std::vector<Player> create_chart(const std::vector<Player>& all_players, std::st
 	}
 
 	size_t filtered_players_size = filtered_players.size();
-
 	if (filtered_players_size < 1) 
 	{
 		std::cout << "No players available" << std::endl;
@@ -241,8 +232,8 @@ std::vector<Player> create_chart(const std::vector<Player>& all_players, std::st
 		print_histogram(filtered_players.at(0), headers);
 		return filtered_players;
 	}		
-
-	else 
+	// if there are more than 1 players, ask for new input and rerun filtering until 1 player, with new filtered vector and new input
+	else
 	{
 		std::cout << "Choose one of the following players: " << std::endl;
 		for (Player new_player : filtered_players)
@@ -257,12 +248,11 @@ std::vector<Player> create_chart(const std::vector<Player>& all_players, std::st
 	
 }
 
+
 std::vector<Player> country_filter(const std::vector<Player>& players, std::string country)
 {
-
 	std::vector<Player> players_from_country;
-	country[0] = toupper(country[0]);
-	
+	country[0] = toupper(country[0]);														// in case user inputs lowercase country
 
 	for (Player p : players)
 	{
@@ -293,7 +283,7 @@ std::vector<Player> club_filter(const std::vector<Player>& all_players, std::str
 {
 
 	std::vector<Player> players_by_club;
-	club_input += " ";
+	club_input += " ";																			// csv file has space after club
 
 	for (Player p : all_players)
 	{
@@ -337,19 +327,17 @@ std::vector<Player> value_filter(const std::vector<Player>& all_players, std::st
 	}
 
 	size_t player_with_name_size = players_with_name.size();
-
 	if (player_with_name_size < 1)
 	{
 		std::cout << "There are no players with this name. " << std::endl;
 		return {};
 	}
-
 	else if (player_with_name_size == 1) 
 	{
 		std::cout << corresponding_values.at(0) << std::endl;
 		return players_with_name;
 	}
-	
+	// keeps asking for new input and filters over and over, until there is 1 person
 	else
 	{
 		std::cout << "Choose one of the following players: " << std::endl;
@@ -360,20 +348,16 @@ std::vector<Player> value_filter(const std::vector<Player>& all_players, std::st
 		std::string new_player;
 		std::getline(std::cin, new_player);
 		return value_filter(players_with_name, new_player);
-
 	}
-
 }
 
 
 std::vector<Player> vision_filter(const std::vector<Player>& all_players, std::string filter)
 {	
 	std::vector<Player> vision_players;
-
 	if (filter.at(0) == '<')
 	{
 		filter = filter.substr(1);
-		
 		int num_filter = stoi(filter);
 
 		for (Player p : all_players)
@@ -384,11 +368,9 @@ std::vector<Player> vision_filter(const std::vector<Player>& all_players, std::s
 			}
 		}
 	}
-
 	else if (filter.at(0) == '>')
 	{
 		filter = filter.substr(1);
-		
 		int num_filter = stoi(filter);
 
 		for (Player p : all_players)
@@ -399,7 +381,7 @@ std::vector<Player> vision_filter(const std::vector<Player>& all_players, std::s
 			}
 		}
 	}
-
+	// if not < or >, must be = or nothing which is =
 	else 
 	{	
 		if (filter.at(0) == '=')
@@ -414,9 +396,7 @@ std::vector<Player> vision_filter(const std::vector<Player>& all_players, std::s
 				vision_players.push_back(p);
 			}
 		}
-		
 	}
-
 	for (Player& p : vision_players)
 	{
 		std::cout << p.name << std::endl;
@@ -427,17 +407,15 @@ std::vector<Player> vision_filter(const std::vector<Player>& all_players, std::s
 		std::cout << "No player available." << std::endl;
 	}
 	return vision_players;
- 
 }
+
 
 std::vector<Player> agility_filter(const std::vector<Player>& all_players, std::string filter)
 {	
 	std::vector<Player> agility_players;
-
 	if (filter.at(0) == '<')
 	{
 		filter = filter.substr(1);
-		
 		int num_filter = stoi(filter);
 
 		for (Player p : all_players)
@@ -448,11 +426,9 @@ std::vector<Player> agility_filter(const std::vector<Player>& all_players, std::
 			}
 		}
 	}
-
 	else if (filter.at(0) == '>')
 	{
 		filter = filter.substr(1);
-		
 		int num_filter = stoi(filter);
 
 		for (Player p : all_players)
@@ -463,7 +439,6 @@ std::vector<Player> agility_filter(const std::vector<Player>& all_players, std::
 			}
 		}
 	}
-
 	else 
 	{	
 		if (filter.at(0) == '=')
@@ -478,32 +453,26 @@ std::vector<Player> agility_filter(const std::vector<Player>& all_players, std::
 				agility_players.push_back(p);
 			}
 		}
-		
 	}
-
 	for (Player& p : agility_players)
 	{
 		std::cout << p.name << std::endl;
 	}
-
 	if (agility_players.size() < 1)
 	{
 		std::cout << "No player available." << std::endl;
 	}
 	return agility_players;
- 
 }
+
 
 std::vector<Player> marking_filter(const std::vector<Player>& all_players, std::string filter)
 {	
 	std::vector<Player> marking_players;
-
 	if (filter.at(0) == '<')
 	{
 		filter = filter.substr(1);
-		
 		int num_filter = stoi(filter);
-
 		for (Player p : all_players)
 		{
 			if (p.stats.at(2) < num_filter)
@@ -512,13 +481,10 @@ std::vector<Player> marking_filter(const std::vector<Player>& all_players, std::
 			}
 		}
 	}
-
 	else if (filter.at(0) == '>')
 	{
-		filter = filter.substr(1);
-		
+		filter = filter.substr(1);	
 		int num_filter = stoi(filter);
-
 		for (Player p : all_players)
 		{
 			if (p.stats.at(2) > num_filter)
@@ -527,7 +493,6 @@ std::vector<Player> marking_filter(const std::vector<Player>& all_players, std::
 			}
 		}
 	}
-
 	else 
 	{	
 		if (filter.at(0) == '=')
@@ -542,20 +507,16 @@ std::vector<Player> marking_filter(const std::vector<Player>& all_players, std::
 				marking_players.push_back(p);
 			}
 		}
-		
 	}
-
 	for (Player& p : marking_players)
 	{
 		std::cout << p.name << std::endl;
 	}
-
 	if (marking_players.size() < 1)
 	{
 		std::cout << "No player available." << std::endl;
 	}
 	return marking_players;
- 
 }
 
 
@@ -565,8 +526,7 @@ std::vector<Player> find_most_similar(const std::vector<Player>& players,  Playe
 	std::vector<int> similarity_scores;
 
 	for (Player p : players)
-	{
-		
+	{	
 		if (p.name != name_of_p1)
 		{
 			all_other_players.push_back(p);
@@ -574,26 +534,21 @@ std::vector<Player> find_most_similar(const std::vector<Player>& players,  Playe
 		}
 	}
 
-	
-
 	int most_similar = min(similarity_scores);
-	
 	for (Player player_b : all_other_players)
 	{
 		if (most_similar == similarity(a, player_b)){
 			std::cout << player_b.name << std::endl;
 		}
 	}
-	
+
 	return all_other_players;
 }
 
 std::vector<Player> filter_by_flag(const std::vector<Player>& all_players, const std::vector<std::string>& flags, const std::vector<std::string>& non_input_flags, const std::vector<std::string>& headers)
 {
 	std::vector<Player> players;
-
 	std::string userInput = fixUserInput(non_input_flags);
-
 	bool has_find_most_similiar = false;
 
 	for (std::string flag : flags)
@@ -601,28 +556,21 @@ std::vector<Player> filter_by_flag(const std::vector<Player>& all_players, const
 		if (flag == "--chart")
 		{
 			players = create_chart(all_players, userInput, headers);
-			return players;
-			
+			return players;																	// could have --chart and --name, don't want infocard, just histogram, so return after
 		}
-
 		else if (flag == "--country")
 		{	
 			players = country_filter(all_players, userInput);
 		}
-
 		else if (flag == "--club")
 		{
 			players = club_filter(all_players, userInput);
 		}
-
 		else if (flag == "--value")
 		{
-			players = value_filter(all_players, userInput);
+			players = value_filter(all_players, userInput);								// same as --chart
 			return players;
-			
-			
 		}
-
 		else if (flag == "--vision" || flag == "--agility" || flag == "--marking")
 		{
 			if (flag == "--vision")
@@ -639,10 +587,7 @@ std::vector<Player> filter_by_flag(const std::vector<Player>& all_players, const
 			{
 				players = marking_filter(all_players, userInput);
 			}
-
 		}
-		
-
 		else if (flag == "--name")
 		{
 			Player player_a;
@@ -651,21 +596,18 @@ std::vector<Player> filter_by_flag(const std::vector<Player>& all_players, const
 			for (Player p : all_players)
 			{
 				p.name = to_lower(p.name);
-
 				if (p.name == userInput)
 				{
 					player_a = p;
 				}
 			}
-
 			for (std::string new_flag : flags)
 			{
-				if (new_flag == "--findmostsimilar")
+				if (new_flag == "--findmostsimilar")										// don't want to print most similar player and infocard
 				{
 					has_find_most_similiar = true;
 				}
 			}
-
 			if (has_find_most_similiar)
 			{
 				
@@ -678,35 +620,21 @@ std::vector<Player> filter_by_flag(const std::vector<Player>& all_players, const
 				
 			}
 		}
-		
 	}
-
 	return players;
 }
 
 
-
-
-
-
-
-
-// compares two players stats of equal length, returns Euclidean Distance between vector of stats
-
 int similarity( Player &a, Player &b )
 {
 	int similarity_percent = 0;
-
-
 	int min = std::min(a.stats.size(), b.stats.size());
 	double summation = 0.0;
 
 	for (int i = 0; i < min; i++){
 		summation += std::pow( a.stats.at(i) - b.stats.at(i), 2);
 	}
-
 	similarity_percent = std::sqrt(summation);
-	
 
 	return similarity_percent;
 }
@@ -722,23 +650,29 @@ const std::string to_lower(std::string& word)
 }
 
 
-// only call when chart invoked 
 void print_histogram(Player& p, const std::vector<std::string> &headers)
 {
+	size_t max_length = 0;
+	for (std::string header : headers)
+	{
+		if (max_length < header.size())
+		{
+			max_length = header.size();
+		}
+	}
+
 	int increment = 6;
 	for (int stat : p.stats){
 		int count = 0;
-		
-		std::cout << headers.at(increment++) << ": ";
+		std::cout << std::setw(max_length) << headers.at(increment++) << ": ";
 		while (count < stat){
 			std::cout << "-";
 			count++;
 		}
 		std::cout << std::endl;
-		
 	}
-
 }
+
 
 int max(std::vector<int>& nums)
 {
@@ -748,12 +682,11 @@ int max(std::vector<int>& nums)
 			max = num;
 		}
 	}
-	
 	return max;
 }
 
 
-int min (std::vector<int>& nums){
+int min(std::vector<int>& nums){
 	int min = nums.at(0);
 	for (int num : nums){
 		if (num < min){
@@ -763,7 +696,7 @@ int min (std::vector<int>& nums){
 	return min;
 }
 
-// prints player infocard 
+
 void print_player_infocard(Player &p, std::vector<Player> all_players)
 {
 	bool does_player_exist = false;
@@ -778,7 +711,7 @@ void print_player_infocard(Player &p, std::vector<Player> all_players)
 	{
 		char buffer[100];
 		std::cout << "####################################################" << std::endl;
-		snprintf(buffer, sizeof(buffer), "## Name: %-40s ##", p.name.c_str() ); 								// each line should sum to 52
+		snprintf(buffer, sizeof(buffer), "## Name: %-40s ##", p.name.c_str() ); 								
 		std::cout << buffer << std::endl;
 		snprintf(buffer, sizeof(buffer), "## Nation: %-38s ##", p.country.c_str() );
 		std::cout << buffer << std::endl;
@@ -794,8 +727,6 @@ void print_player_infocard(Player &p, std::vector<Player> all_players)
 		std::cout << "No player available" << std::endl;
 	}
 }
-
-
 
 
 /* We will have to assume the player data is up-to-date */
