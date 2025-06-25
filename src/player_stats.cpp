@@ -1,10 +1,3 @@
-#include <iostream>
-#include <iomanip>
-#include <ctime>
-#include <fstream>
-#include <sstream>
-#include <cmath>
-#include <cctype>
 #include "player_stats.hpp"
 
 
@@ -350,6 +343,7 @@ std::vector<Player> value_filter(const std::vector<Player>& all_players, std::st
 		std::string new_player;
 		std::getline(std::cin, new_player);
 		return value_filter(players_with_name, new_player);
+		
 	}
 }
 
@@ -652,8 +646,14 @@ std::vector<Player> filter_by_flag(const std::vector<Player>& all_players, const
 			}
 			else if (!has_chart)
 			{
-				print_player_infocard(player_a, all_players);
+				std::string new_name = player_a.name;
+				players = create_chart(all_players, new_name, headers);
+				return players;
 				
+			}
+			else
+			{
+				print_player_infocard(player_a, all_players);
 			}
 		}
 	}
@@ -790,6 +790,4 @@ int ageToYearBorn ( Player &p )
 
 
 
-
-// FIX --chart and --name when reading in multiple times
 // ADD tests.cpp and fix readme

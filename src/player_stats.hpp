@@ -6,6 +6,13 @@
 #define PLAYERSTATS_H
 #include <string>
 #include <vector>
+#include <iostream>
+#include <iomanip>
+#include <ctime>
+#include <fstream>
+#include <sstream>
+#include <cmath>
+#include <cctype>
 
 struct Player {
 	std::string name;
