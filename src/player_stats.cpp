@@ -1,6 +1,12 @@
 #include "player_stats.hpp"
 
 
+
+/*
+Requires: vector of string - pass in the flags (anything with --), take output vector from find_flags()
+Effect: checks if user inputted available flags
+Returns: True (if flag is available), False (otherwise)
+*/
 bool check_flags(const std::vector<std::string>& flags) 
 {
 	std::vector<std::string> available_flags = {"--name", "--country", "--club", "--vision", "--agility", "--marking", "--value"};
@@ -21,6 +27,11 @@ bool check_flags(const std::vector<std::string>& flags)
 }
 
 
+/*
+Requires: vector of strings - pass in the arguments that aren't files or flags, take output vector from non_flag_inputs()
+Effect: does not matter if user used " ", will create a string
+Returns: a string that can be compared to strings in csv file
+*/
 const std::string fixUserInput(const std::vector<std::string>& non_flag_inputs)
 {
 	std::string userInput;
@@ -38,7 +49,11 @@ const std::string fixUserInput(const std::vector<std::string>& non_flag_inputs)
 }
 
 
-// by storing argumentss in vector, can extract flags, files, and other inputs, terminal input doesn't need to be in specific order
+/*
+Requires: arguments from terminal
+Effect: parses through all arguments (starting with executable), allows for flexible inputs
+Returns: vector of strings containing user inputted arguments
+*/
 const std::vector<std::string> parse_arguments(int argc, char* argv[])
 {	
 	std::vector<std::string> arguments; 
@@ -52,6 +67,11 @@ const std::vector<std::string> parse_arguments(int argc, char* argv[])
 }
 
 
+/*
+Requires: vector of strings -> pass in return vector from parse_arguments()
+Effect: checks if the user inputted a csv file and stores it, if not can check in main and fail gracefully
+Returns: string which is the filename
+*/
 const std::string find_csv(const std::vector<std::string>& arguments) 
 {
 	
@@ -65,11 +85,13 @@ const std::string find_csv(const std::vector<std::string>& arguments)
 	return "No File Input";
 }
 
-
-
+/*
+Requires: vector of strings -> pass in return vector from parse_arguments()
+Effect: checks if user inputted available flags, adds to vector
+Returns: vector of strings containing flags (anything with --)
+*/
 const std::vector<std::string> find_flags(const std::vector<std::string>& arguments)
 {
-
 	std::vector<std::string> flags;
 
 	for (std::string arg : arguments)
@@ -84,6 +106,11 @@ const std::vector<std::string> find_flags(const std::vector<std::string>& argume
 }
 
 
+/*
+Requires: vector of string - pass in the return flag from arguments
+Effect: checks if user inputted anythig that is not a file or flag (--), adds to vector
+Returns: returns vector of strings, which are non_flag_inputs
+*/
 const std::vector<std::string> non_flag_inputs(const std::vector<std::string>& arguments)
 {
 
@@ -101,10 +128,13 @@ const std::vector<std::string> non_flag_inputs(const std::vector<std::string>& a
 	return filters;
 }
 
-
+/*
+Requires: string containing filename - should only be called if find_csv was NOT "No File Input" in main
+Effect: parses through csv, takes in the first line, splits by comma delimiter, and pushes each header into vector
+Returns: vector of strings that contains each header of player info -> used when printing histogram
+*/
 const std::vector<std::string> find_headers(const std::string &filename) 
 {
-
 	std::ifstream inputFile;
 	inputFile.open(filename);
 
@@ -130,10 +160,13 @@ const std::vector<std::string> find_headers(const std::string &filename)
 	return headers;
 }
 
-
+/*
+Requires: string containing filename, same requirement as find_headers()
+Effect: parse through csv, and convert each line into a player, using the Player struct
+Returns: vector of players containing all players
+*/
 const std::vector<Player> create_player_vector(const std::string& fileName) 
 {
-
 	std::ifstream inputFile;
   	inputFile.open(fileName);
 
@@ -199,7 +232,13 @@ const std::vector<Player> create_player_vector(const std::string& fileName)
 	return all_players;
 }
 
-
+/*
+Requires: vector of all players, a string with user input, and vector of headers, 
+			if --chart called, call create_chart (should also call fixUserInput() on the non_flag_inputs)
+Effect: check user input against all player names (after converting both to lowercase), 
+		keep filtering (calling function) until there is only 1 player, then print player's histogram 
+Returns: vector of player, should only be only length 1, containing final filtered player
+*/
 std::vector<Player> create_chart(const std::vector<Player>& all_players, std::string& input, const std::vector<std::string>& headers)
 {
 	std::vector<Player> filtered_players;
@@ -244,6 +283,11 @@ std::vector<Player> create_chart(const std::vector<Player>& all_players, std::st
 }
 
 
+/*
+Requires: vector of players and user inputted country, does not matter if user capitalized country, but must be spelled right
+Effect: go through all players and add only the players from the matching country to a vector
+Returns: vector of players containing players from country
+*/
 std::vector<Player> country_filter(const std::vector<Player>& players, std::string country)
 {
 	std::vector<Player> players_from_country;
@@ -273,10 +317,13 @@ std::vector<Player> country_filter(const std::vector<Player>& players, std::stri
 	}
 }
 
-
+/*
+Requires: vector of players and user inputted club, only call when --club flag is invoked, user does not need to put club in quotes
+Effect: fix the club input (add a space) to match csv file, go through all players, add players with matching clubs to vector
+Returns: vector of players containing players from club
+*/
 std::vector<Player> club_filter(const std::vector<Player>& all_players, std::string club_input)
 {
-
 	std::vector<Player> players_by_club;
 	club_input += " ";																			// csv file has space after club
 
@@ -305,7 +352,12 @@ std::vector<Player> club_filter(const std::vector<Player>& all_players, std::str
 	}
 }
 
-
+/*
+Requires: vector of players and user inputted player, does not matter if user capitalized name, or put name in quotes, only invoke when --value
+Effect: keeps filtering based on name until there is only 1 player, filtered result keeps being passed in, 
+		so user doesn't have to type in full name and print value of player
+Returns: vector of player with corresponding name, should only be length <= 1
+*/
 std::vector<Player> value_filter(const std::vector<Player>& all_players, std::string player_name)
 {
 	player_name = to_lower(player_name);
@@ -347,7 +399,11 @@ std::vector<Player> value_filter(const std::vector<Player>& all_players, std::st
 	}
 }
 
-
+/*
+Requires: vector of players and user inputted filter, must be in quotes, but could be <, >, =, or nothing (which is equals)
+Effect: for all players and given filters, only add players that fit requirement
+Returns: vector of players with given attribute
+*/
 std::vector<Player> vision_filter(const std::vector<Player>& all_players, std::string filter)
 {	
 	std::vector<Player> vision_players;
@@ -406,6 +462,11 @@ std::vector<Player> vision_filter(const std::vector<Player>& all_players, std::s
 }
 
 
+/*
+Requires: vector of players and user inputted filter, must be in quotes, but could be <, >, =, or nothing (which is equals)
+Effect: for all players and given filters, only add players that fit requirement
+Returns: vector of players with given attribute
+*/
 std::vector<Player> agility_filter(const std::vector<Player>& all_players, std::string filter)
 {	
 	std::vector<Player> agility_players;
@@ -461,7 +522,11 @@ std::vector<Player> agility_filter(const std::vector<Player>& all_players, std::
 	return agility_players;
 }
 
-
+/*
+Requires: vector of players and user inputted filter, must be in quotes, but could be <, >, =, or nothing (which is equals)
+Effect: for all players and given filters, only add players that fit requirement
+Returns: vector of players with given attribute
+*/
 std::vector<Player> marking_filter(const std::vector<Player>& all_players, std::string filter)
 {	
 	std::vector<Player> marking_players;
@@ -516,62 +581,11 @@ std::vector<Player> marking_filter(const std::vector<Player>& all_players, std::
 }
 
 
-std::vector<Player> find_most_similar(const std::vector<Player>& players,  Player& a, std::string name_of_p1)
-{
-	std::vector<Player> all_other_players;
-	std::vector<int> similarity_scores;
-
-	for (Player p : players)
-	{	
-		if (p.name != name_of_p1)
-		{
-			all_other_players.push_back(p);
-			similarity_scores.push_back(similarity(a, p));
-		}
-	}
-
-	int most_similar = min(similarity_scores);
-	for (Player player_b : all_other_players)
-	{
-		if (most_similar == similarity(a, player_b)){
-			std::cout << player_b.name << std::endl;
-		}
-	}
-
-	return all_other_players;
-}
-
-
-std::vector<Player> find_1_player(const std::vector<Player>& multiple_players, std::string input)
-{
-	input = to_lower(input);
-	std::vector<Player> one_player;
-	for (Player p : multiple_players)
-	{
-		if (p.name.find(input) != std::string::npos)
-		{
-			one_player.push_back(p);
-		}
-	}
-	
-	if (one_player.size() <= 1)
-	{
-		return one_player;
-	}
-	else
-	{
-		std::cout << "Choose one of the following players: " << std::endl;
-		for (Player p : one_player)
-		{
-			std::cout << p.name << std::endl;
-		}
-		std::string new_input;
-		getline(std::cin, new_input);
-		return find_1_player(one_player, new_input);
-	}
-}
-
-
+/*
+Requires: vector of all players, vector of strings containing flags, vector of strings containing inputs, and vector of strings containing headers
+Effect: 
+Returns: 
+*/
 std::vector<Player> filter_by_flag(const std::vector<Player>& all_players, const std::vector<std::string>& flags, const std::vector<std::string>& non_input_flags, const std::vector<std::string>& headers)
 {
 	std::vector<Player> players;
@@ -661,6 +675,42 @@ std::vector<Player> filter_by_flag(const std::vector<Player>& all_players, const
 }
 
 
+
+
+/*
+Requires: vector of players, player a, and inputted name (should be same name as player a) 
+		- only invoke when --find_most_similar and --name are called but order does not matter and also shouldn't print infocard
+Effect: go through all players, skip over player a, and call similarities on player a stats and every other player stats, put similarties scores in vector,
+		find minimum from similarty score (closest player stats-wise using Euclidean formula)
+Returns: vector of players, should just be 1 player, who has the closest stats
+*/
+std::vector<Player> find_most_similar(const std::vector<Player>& players,  Player& a, std::string name_of_p1)
+{
+	std::vector<Player> all_other_players;
+	std::vector<int> similarity_scores;
+
+	for (Player p : players)
+	{	
+		if (p.name != name_of_p1)
+		{
+			all_other_players.push_back(p);
+			similarity_scores.push_back(similarity(a, p));
+		}
+	}
+
+	int most_similar = min(similarity_scores);
+	for (Player player_b : all_other_players)
+	{
+		if (most_similar == similarity(a, player_b)){
+			std::cout << player_b.name << std::endl;
+		}
+	}
+
+	return all_other_players;
+}
+
+
+
 int similarity( Player &a, Player &b )
 {
 	int similarity_percent = 0;
@@ -675,6 +725,41 @@ int similarity( Player &a, Player &b )
 	return similarity_percent;
 }
 
+
+/*
+Requires: vector of players and user inputted name
+Effect: keep calling find_1_player, using input (after lowercased) until the vector is only of length <= 1
+Returns: vector of player, should only have length of 0 or 1
+*/
+
+std::vector<Player> find_1_player(const std::vector<Player>& multiple_players, std::string input)
+{
+	input = to_lower(input);
+	std::vector<Player> one_player;
+	for (Player p : multiple_players)
+	{
+		if (p.name.find(input) != std::string::npos)
+		{
+			one_player.push_back(p);
+		}
+	}
+	
+	if (one_player.size() <= 1)
+	{
+		return one_player;
+	}
+	else
+	{
+		std::cout << "Choose one of the following players: " << std::endl;
+		for (Player p : one_player)
+		{
+			std::cout << p.name << std::endl;
+		}
+		std::string new_input;
+		getline(std::cin, new_input);
+		return find_1_player(one_player, new_input);
+	}
+}
 
 const std::string to_lower(std::string& word)
 {

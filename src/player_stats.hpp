@@ -82,7 +82,7 @@ const std::vector<std::string> find_flags(const std::vector<std::string>& argume
 const std::vector<std::string> non_flag_inputs(const std::vector<std::string> &arguments);
 
 
-/* create_player_vector() -- go through csv and create a vector of players for each problem
+/* create_player_vector() -- go through csv and create a vector of players for each player
 */
 const std::vector<Player> create_player_vector(const std::string& fileName);
 
